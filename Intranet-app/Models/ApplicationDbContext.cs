@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Intranet_app
+namespace Intranet_app.Models
 {
     public class ApplicationDbContext : DbContext
     {
+        public DbSet<Ramen> Ramen { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
@@ -16,7 +18,7 @@ namespace Intranet_app
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.ApplyConfiguration(new RamenMap());
         }
     }
 }
