@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Intranet_app.Mapping
 {
-    public class TopppingMap : IEntityTypeConfiguration<Topping>
+    public class ToppingMap : IEntityTypeConfiguration<Topping>
     {
         public void Configure(EntityTypeBuilder<Topping> builder)
         {

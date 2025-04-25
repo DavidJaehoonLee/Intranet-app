@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Intranet_app.Mapping;
 
 namespace Intranet_app.Models
 {
@@ -19,6 +20,8 @@ namespace Intranet_app.Models
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfiguration(new RamenMap());
+            modelBuilder.ApplyConfiguration(new RecipeMap());
+            modelBuilder.ApplyConfiguration(new ToppingMap());
         }
     }
 }
