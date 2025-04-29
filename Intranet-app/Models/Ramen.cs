@@ -13,7 +13,7 @@ namespace Intranet_app.Models
         public decimal Price { get; set; }
         public string RamenDescription { get; set; }
         public int Quantity { get; set; }
-        public ICollection<Recipe> Recipes { get; set; }
-        public ICollection<Topping> Toppings { get; set; }
+        public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
+        public ICollection<Topping> Toppings { get; set; } = new List<Topping>();
     }
 }
