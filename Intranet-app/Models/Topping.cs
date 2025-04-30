@@ -12,7 +12,7 @@ namespace Intranet_app.Models
         public decimal Price { get; set; }
         public decimal Weight { get; set; }
         public string ToppingDescription { get; set; }
-        public ICollection<Ramen> Ramens { get; set; }
-        public ICollection<Recipe> Recipes { get; set; }
+        public ICollection<Ramen> Ramens { get; set; } = new List<Ramen>();
+        public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
     }
 }
