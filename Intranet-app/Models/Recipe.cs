@@ -10,7 +10,5 @@ namespace Intranet_app.Models
         public int RecipeID { get; set; }
         public string RecipeName { get; set; }
         public string RecipeInstruction { get; set; }
-        public ICollection<Ramen> Ramens { get; set; } = new List<Ramen>();
-        public ICollection<Topping> Toppings { get; set; } = new List<Topping>();
     }
 }

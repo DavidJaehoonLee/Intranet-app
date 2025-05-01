@@ -15,8 +15,6 @@ namespace Intranet_app.Mapping
             builder.HasKey(x => x.ToppingID);
             builder.Property(x => x.ToppingName).HasMaxLength(50).IsRequired();
             builder.Property(x => x.ToppingDescription).HasMaxLength(200).IsRequired();
-            builder.HasMany(x => x.Ramens).WithMany(x => x.Toppings);
-            builder.HasMany(x => x.Recipes).WithMany(x => x.Toppings);
         }
     }
 }

@@ -18,8 +18,6 @@ namespace Intranet_app.Mapping
             builder.Property(x => x.Price).IsRequired();
             builder.Property(x => x.RamenDescription).HasMaxLength(500).IsRequired();
             builder.Property(x => x.Quantity).IsRequired();
-            builder.HasMany(x => x.Recipes).WithMany(x => x.Ramens);
-            builder.HasMany(x => x.Toppings).WithMany(x => x.Ramens); 
         }
     }
 }
