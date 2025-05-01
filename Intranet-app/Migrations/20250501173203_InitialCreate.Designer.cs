@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Intranet_app.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250429210326_InitialCreate")]
+    [Migration("20250501173203_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,96 +101,6 @@ namespace Intranet_app.Migrations
                     b.HasKey("ToppingID");
 
                     b.ToTable("Toppings");
-                });
-
-            modelBuilder.Entity("RamenRecipe", b =>
-                {
-                    b.Property<int>("RamensRamenID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RecipesRecipeID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RamensRamenID", "RecipesRecipeID");
-
-                    b.HasIndex("RecipesRecipeID");
-
-                    b.ToTable("RamenRecipe");
-                });
-
-            modelBuilder.Entity("RamenTopping", b =>
-                {
-                    b.Property<int>("RamensRamenID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ToppingsToppingID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RamensRamenID", "ToppingsToppingID");
-
-                    b.HasIndex("ToppingsToppingID");
-
-                    b.ToTable("RamenTopping");
-                });
-
-            modelBuilder.Entity("RecipeTopping", b =>
-                {
-                    b.Property<int>("RecipesRecipeID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ToppingsToppingID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RecipesRecipeID", "ToppingsToppingID");
-
-                    b.HasIndex("ToppingsToppingID");
-
-                    b.ToTable("RecipeTopping");
-                });
-
-            modelBuilder.Entity("RamenRecipe", b =>
-                {
-                    b.HasOne("Intranet_app.Models.Ramen", null)
-                        .WithMany()
-                        .HasForeignKey("RamensRamenID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Intranet_app.Models.Recipe", null)
-                        .WithMany()
-                        .HasForeignKey("RecipesRecipeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RamenTopping", b =>
-                {
-                    b.HasOne("Intranet_app.Models.Ramen", null)
-                        .WithMany()
-                        .HasForeignKey("RamensRamenID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Intranet_app.Models.Topping", null)
-                        .WithMany()
-                        .HasForeignKey("ToppingsToppingID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RecipeTopping", b =>
-                {
-                    b.HasOne("Intranet_app.Models.Recipe", null)
-                        .WithMany()
-                        .HasForeignKey("RecipesRecipeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Intranet_app.Models.Topping", null)
-                        .WithMany()
-                        .HasForeignKey("ToppingsToppingID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
