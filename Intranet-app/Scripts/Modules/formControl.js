@@ -78,6 +78,39 @@ export default class FormControl extends Message {
         return this.#numberMask ? this.#value : this.elem.value;
     }
 
+    set value(value) {
+        this.elem.value = value;
+        if (this.#numberMask) {
+            this.#value = value;
+            this.#setFormatNumberValue();
+        }
+    }
 
+    set decimals(val) {
+        this.#decimals = val;
+    }
+
+    get isValidEmail() {
+        return this.#emailPattern.test(this.elem.value);
+    }
+
+    get areValidEmails() {
+        const emails = this.elem.value.trim().split(/,|;/);
+        for (const email of emails) {
+            if (!this.#emailPattern.test(email.trim())) {
+                return false();
+            }
+        }
+        return true;
+    }
+
+    get isEmpty() {
+        return this.elem.value.trim() === "";
+    }
+
+    get selectedText() {
+        const option = this.elem.querySelector("option:checked ");
+        return option ? option.text : null;
+    }
 
 }
