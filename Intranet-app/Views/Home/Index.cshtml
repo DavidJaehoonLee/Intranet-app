@@ -2,7 +2,19 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<main class="l-general-content">
+    <section>
+        <div>
+            <h2>landing page</h2>
+            <button id="showToastBtn" class="btn btn-warning">Show Toast</button>
+        </div>
+    </section>
+</main>
+
+<script type="module">
+    import Toast, { ToastLength } from '/js/Modules/toast.js';
+
+    document.getElementById('showToastBtn')?.addEventListener('click', () => {
+        Toast.warning("This is a toast triggered by button!");
+    });
+</script>

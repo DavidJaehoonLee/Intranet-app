@@ -25,8 +25,7 @@ namespace Intranet_app
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Register controllers (API only)
-            services.AddControllers();
+            services.AddControllersWithViews(); // Replaces AddControllers()
 
             // Register Swagger
             services.AddSwaggerGen(c =>
@@ -47,7 +46,7 @@ namespace Intranet_app
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Intranet API v1");
-                    c.RoutePrefix = string.Empty; // Serve Swagger UI at root
+                    c.RoutePrefix = "swagger"; // Serve Swagger UI at root
                 });
             }
             else
@@ -65,8 +64,11 @@ namespace Intranet_app
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); // For API controllers
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}"); // Web routing
             });
+
         }
     }
 }
