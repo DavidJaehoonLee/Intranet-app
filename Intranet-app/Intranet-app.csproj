@@ -19,6 +19,23 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="Scripts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\antiForgeryToken.js" />
+    <None Include="wwwroot\js\global.js" />
+    <None Include="wwwroot\js\Modules\enums.js" />
+    <None Include="wwwroot\js\Modules\errors.js" />
+    <None Include="wwwroot\js\Modules\fetch.js" />
+    <None Include="wwwroot\js\Modules\formControl.js" />
+    <None Include="wwwroot\js\Modules\lazyLoader.js" />
+    <None Include="wwwroot\js\Modules\message.js" />
+    <None Include="wwwroot\js\Modules\messageDialog.js" />
+    <None Include="wwwroot\js\Modules\messageLoader.js" />
+    <None Include="wwwroot\js\Modules\sessionHelper.js" />
+    <None Include="wwwroot\js\Modules\toast.js" />
+    <None Include="wwwroot\js\Modules\utils.js" />
   </ItemGroup>
 
 </Project>
