@@ -1,0 +1,134 @@
+﻿@import "fonts/montserrat/montserrat.css";
+
+@font-face {
+    font-family: 'Material Icons Round';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/materialiconsround/v108/LDItaoyNOAY6Uewc665JcIzCKsKc_M9flwmP.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Material Symbols Rounded';
+    font-style: normal;
+    font-weight: 100 700;
+    src: url(https://fonts.gstatic.com/s/materialsymbolsrounded/v222/sykg-zNym6YjUruM-QrEh7-nyTnjDwKNJ_190Fjzag.woff2) format('woff2');
+}
+
+:root {
+    --primary-color: #142d53;
+    --primary-dark-color: #102544;
+    --accent-color: #af2024;
+    --accent-dark-color: #86181d;
+    --light-accent-color: #F6E8E8;
+    --grey-color: #ddd;
+    --dark-grey-color: #69606C;
+    --light-grey-color: #F1F1F1;
+    --white-color: #fff;
+    --black-color: #000;
+    --input-border-color: #ced4da;
+    --label-color: #212529;
+    --green-color: #14A952;
+    --header-bar-color: #F0F5FA;
+    --header-bar-border-color: #E9EDF2;
+    --red-color: #ec1111;
+    /* Messages
+    /-------------------------------------*/
+    /* bcolor  => border color */
+    /* color   => font color */
+    /* bgcolor => background color */
+
+    --message-default-bgcolor: #e2e3e5;
+    --message-default-bcolor: #d6d8db;
+    --message-success-color: #155724;
+    --message-success-bgcolor: #d4edda;
+    --message-success-bcolor: #c3e6cb;
+    --message-warning-color: #856404;
+    --message-warning-bgcolor: #fff3cd;
+    --message-warning-bcolor: #ffeeba;
+    --message-error-color: #721c24;
+    --message-error-bgcolor: #f8d7da;
+    --message-error-bcolor: #f5c6cb;
+    --message-info-color: #0c5460;
+    --message-info-bgcolor: #d1ecf1;
+    --message-info-bcolor: #bee5eb;
+    --input-error-color: #cf0010;
+    --input-info-color: #19b5ff;
+    --input-warning-color: #f99406;
+    --input-success-color: #26a65b;
+    --toast-error-bgcolor: #f7ccd0;
+    --toast-info-bgcolor: #a3e2ff;
+    --toast-warning-bgcolor: #fce9cd;
+    --toast-success-bgcolor: #b3ebc0;
+    --dialog-error-color: #cf0010;
+    --dialog-info-color: #19b5ff;
+    --dialog-warning-color: #f99406;
+    --dialog-success-color: #26a65b;
+    /* Status Colors
+    ---------------------------------------*/
+    --prospect-color: #8a9493;
+    --prospect-cancelled-color: #B6410C;
+    --prospect-adverse-color: #BE5504;
+    --pre-locked-color: #6d7a8a;
+    --sent-to-processor-color: #6887B6;
+    --registered-color: #19b5ff;
+    --disclosure-desk-color: #d195d5;
+    --processing-color: #6d7a8a;
+    --submission-adverse-color: #e46a17;
+    --submission-cancelled-color: #e52b05;
+    --submit-to-uw-color: #86e2d5;
+    --uw-received-color: #36d7b6;
+    --resubmitted-to-uw-color: #68c3a2;
+    --uw-suspended-color: #f99406;
+    --uw-adverse-color: #eb974e;
+    --uw-cancelled-color: #e84c3d;
+    --closed-for-incompleteness-color: #97271c;
+    --withdrawn-color: #cf0010;
+    --uw-approved-with-conditions-color: #90c695;
+    --uw-final-approval-color: #16a086;
+    --docs-ordered-color: #8ac4f4;
+    --docs-drawn-color: #5c97bf;
+    --docs-out-color: #4183d7;
+    --docs-back-color: #336f7a;
+    --funded-color: #26a65b;
+    --pulled-color: #afa8d2;
+    --post-closing-color: #be91d2;
+    --insured-color: #8d44ad;
+    --shipping-color: #674170;
+    --purchased-color: #67809f;
+    --repurchased-color: #34495e;
+    --prospect-bgcolor: #8a949333;
+    --prospect-cancelled-bgcolor: #B6410C33;
+    --prospect-adverse-bgcolor: #BE550433;
+    --pre-locked-bgcolor: #6d7a8a33;
+    --sent-to-processor-bgcolor: #6887B633;
+    --registered-bgcolor: #19b5ff33;
+    --disclosure-desk-bgcolor: #d195d533;
+    --processing-bgcolor: #6d7a8a33;
+    --submission-adverse-bgcolor: #e46a1733;
+    --submission-cancelled-bgcolor: #e52b0533;
+    --submit-to-uw-bgcolor: #86e2d533;
+    --uw-received-bgcolor: #36d7b633;
+    --resubmitted-to-uw-bgcolor: #68c3a233;
+    --uw-suspended-bgcolor: #f9940633;
+    --uw-adverse-bgcolor: #eb974e33;
+    --uw-cancelled-bgcolor: #e84c3d33;
+    --closed-for-incompleteness-bgcolor: #97271c33;
+    --withdrawn-bgcolor: #cf001033;
+    --uw-approved-with-conditions-bgcolor: #90c69533;
+    --uw-final-approval-bgcolor: #16a08633;
+    --docs-ordered-bgcolor: #8ac4f433;
+    --docs-drawn-bgcolor: #5c97bf33;
+    --docs-out-bgcolor: #4183d733;
+    --docs-back-bgcolor: #336f7a33;
+    --funded-bgcolor: #26a65b33;
+    --pulled-bgcolor: #afa8d233;
+    --post-closing-bgcolor: #be91d233;
+    --insured-bgcolor: #8d44ad33;
+    --shipping-bgcolor: #67417033;
+    --purchased-bgcolor: #67809f33;
+    --repurchased-bgcolor: #34495e33;
+    /*Font Icons
+    ------------------------------------------*/
+    --icon: "Material Icons Round";
+    --symbol: "Material Symbols Rounded";
+}
