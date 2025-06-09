@@ -8,8 +8,8 @@ export default class FormControl extends Message {
     constructor(id, decimals = 0, maxLength = 0) {
         super(document.getElementById(id).parentNode);
         this.elem = document.getElementById(id);
-        this.#decials = decimals;
-        if (this.elem.nodeName === "INPUT" && this.elem.getAttribute("inputmode") === "numberic") {
+        this.#decimals = decimals;
+        if (this.elem.nodeName === "INPUT" && this.elem.getAttribute("inputmode") === "numeric") {
             this.#numberMask = true;
             if (maxLength > 0) this.elem.maxLength = maxLength;
             this.elem.onfocus = this.#focusEvent;
@@ -23,25 +23,19 @@ export default class FormControl extends Message {
     }
 
     #blurEvent = (e) => {
-        this.#value = e.target.value.replaceAll(",", "");
-        if (this.#value !== "") {
+        this.#value = e.target.value.replace(/,/g, "");
+        if (this.#value !== "")
             this.#setFormatNumberValue();
-        }
-    }
-
-    #setFormatNumberValue() {
-        let options = { minimumFractionDigits: this.#decimals, maximumFractionDigits: this.#decimals };
-        let val = this.elem.value.replaceAll(",", "");
-        this.elem.value = new Intl.NumberFormat('en-EN', options).format(val);
     }
 
     #keyEvent = (e) => {
-        if ((this.#decimals == 0 || e.target.value.include(".")) && (e.keyCode == 190 || e.keyCode == 110)) {
+        if ((this.#decimals == 0 || e.target.value.includes(".")) && (e.keyCode == 190 || e.keyCode == 110)) {
             e.preventDefault();
             return;
         }
 
-        if (![8, 9, 37, 39, 110, 190].includes(e.keyCode) && (e.keyCode < 48 || (e.keyCode > 57 && e.keyCode < 96) e.keyCode > 105)) {
+        if (![8, 9, 37, 39, 110, 190].includes(e.keyCode) &&
+            (e.keyCode < 48 || (e.keyCode > 57 && e.keyCode < 96) || e.keyCode > 105)) {
             e.preventDefault();
             return;
         }
@@ -56,20 +50,24 @@ export default class FormControl extends Message {
         }
     }
 
+    #setFormatNumberValue() {
+        let options = { minimumFractionDigits: this.#decimals, maximumFractionDigits: this.#decimals };
+        let val = this.elem.value.replace(/,/g, "");
+        this.elem.value = new Intl.NumberFormat('en-EN', options).format(val);
+    }
+
     set onBlur(fn) {
         this.elem.onblur = (e) => {
-            if (this.#numberMask) {
+            if (this.#numberMask)
                 this.#blurEvent(e);
-            }
             fn(e);
         }
     }
 
     set onFocus(fn) {
         this.elem.onfocus = (e) => {
-            if (this.#numberMask) {
+            if (this.#numberMask)
                 this.#focusEvent(e);
-            }
             fn(e);
         }
     }
@@ -98,7 +96,7 @@ export default class FormControl extends Message {
         const emails = this.elem.value.trim().split(/,|;/);
         for (const email of emails) {
             if (!this.#emailPattern.test(email.trim())) {
-                return false();
+                return false;
             }
         }
         return true;
