@@ -13,7 +13,6 @@ const createDialog = (message, title, type, callbackConfirm, callback) => {
     const dialogMessage = document.createElement("div");
     dialogMessage.className = "c-message-dialog__message";
     dialogContent.appendChild(dialogMessage);
-
     //if title info exists, add to dialog
     if (title) {
         const titleText = document.createElement("span");
@@ -102,7 +101,7 @@ export default class MessageDialog {
         });
 
         if (messageDialogCollection.length == 1)
-            messageDialogCollection[0];
+            messageDialogCollection[0]();
     }
 
     static show(message, title = undefined, callback = undefined) {
@@ -126,21 +125,6 @@ export default class MessageDialog {
     }
 
     static confirm(message, title = undefined, callbackConfirm = undefined, callback = undefined) {
-        this.#showDialog(message, title, MessageType.CONFIRM, callback, callbackConfirm)
+        this.#showDialog(message, title, MessageType.CONFIRM, callback, callbackConfirm);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

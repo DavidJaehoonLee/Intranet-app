@@ -19,11 +19,24 @@
         </div>
     </section>
 
+    <section>
+        <div>
+            <h2>Message Dialog test</h2>
+            <button onclick="MessageDialog.show('This is a normal message')">Show</button>
+            <button onclick="MessageDialog.error('This is an error!')">Error</button>
+            <button onclick="MessageDialog.warning('This is a warning!')">Warning</button>
+            <button onclick="MessageDialog.success('This was successful!')">Success</button>
+            <button onclick="MessageDialog.confirm('Are you sure?', 'Please confirm', () => alert('Confirmed!'), () => alert('Cancelled'))">Confirm</button>
+        </div>
+    </section>
+
 </main>
 
 <script type="module">
     import Toast, { ToastLength } from '/js/Modules/toast.js';
-    import FormControl from "/js/Modules/formControl.js";
+    import FormControl from '/js/Modules/formControl.js';
+    import MessageDialog from '/js/Modules/messageDialog.js';
+    window.MessageDialog = MessageDialog;
 
 
     /* Toast tester */

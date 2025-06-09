@@ -10,7 +10,8 @@ function addAntiForgeryToken(data, containerSelector) {
     if (tokenInputBySelector) {
         token = tokenInputBySelector.value;
     } else {
-        const anyTokenInput = document.querySelector("iput[name='__RequestVerificationToken']");
+        // use any available token input
+        const anyTokenInput = document.querySelector("input[name='__RequestVerificationToken']");
 
         if (anyTokenInput) {
             token = anyTokenInput.value;
@@ -26,8 +27,8 @@ function addAntiForgeryToken(data, containerSelector) {
             if (!data.hasOwnProperty("__RequestVerificationToken")) {
                 data.__RequestVerificationToken = token;
             }
-        } else {
-            if (!data.includes("__RequestVerification")) {
+        } else { // when the data is already serialized
+            if (!data.includes("__RequestVerificationToken")) {
                 data += "&__RequestVerificationToken=" + encodeURIComponent(token);
             }
         }
