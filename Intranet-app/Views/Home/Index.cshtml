@@ -5,17 +5,68 @@
 <main class="l-general-content">
     <section>
         <div>
-            <h2>landing page</h2>
+            <h2>Toast test</h2>
             <button id="showToastBtn" class="btn btn-warning">Show Toast</button>
         </div>
     </section>
+
+    <section>
+        <div>
+            <h2>Form Control test</h2>
+            <input id="amountInput" type="text" inputmode="numeric" placeholder="Enter amount" />
+            <input id="emailInput" type="text" placeholder="Enter email(s)" />
+            <button id="submitBtn">Submit</button>
+        </div>
+    </section>
+
 </main>
 
 <script type="module">
     import Toast, { ToastLength } from '/js/Modules/toast.js';
+    import FormControl from "/js/Modules/formControl.js";
 
 
+    /* Toast tester */
     document.getElementById('showToastBtn')?.addEventListener('click', () => {
         Toast.warning("This is a toast triggered by button!");
     });
+
+
+    /* FormControl tester */
+    // Create instance for numeric input with 2 decimal places and maxLength of 10
+    const amountControl = new FormControl("amountInput", 2, 10);
+
+    // Create instance for email input with no number mask
+    const emailControl = new FormControl("emailInput");
+
+    // Add custom blur event to show alert if email is invalid
+    emailControl.onBlur = (e) => {
+        if (!emailControl.areValidEmails) {
+            alert("One or more email addresses are invalid.");
+        }
+    };
+
+    // Handle button click
+    document.getElementById("submitBtn").addEventListener("click", () => {
+        const amount = amountControl.value;
+        const emails = emailControl.value;
+
+        if (amountControl.isEmpty || emailControl.isEmpty) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        if (!emailControl.areValidEmails) {
+            alert("Invalid email address.");
+            return;
+        }
+
+        console.log("Amount:", amount);
+        console.log("Emails:", emails);
+        alert("Form submitted successfully.");
+    });
+
+
 </script>
+
+
