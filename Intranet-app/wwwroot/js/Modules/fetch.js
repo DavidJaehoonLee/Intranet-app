@@ -5,7 +5,7 @@ export default class Fetch {
         if (url === undefined || typeof (url) !== "string")
             throw new FetchError(`The URL value is not valid. It must be an string.`);
         this.reset();
-        this.endpoint = url.trim().replace(/\/\/*/g, "/");
+        this.endpoint = url.trim().replace(/\/\/*/g, "/"); //remove last slash if exists
     }
 
     #methodValidation(value) {
@@ -21,10 +21,10 @@ export default class Fetch {
     }
 
     reset() {
-        this.parameter = "";
-        this.queryString = "";
-        this.headers = { 'Content-Type': 'application/json' };
-        this.authentication = {};
+        this.parameter = "",
+            this.queryString = "",
+            this.headers = { 'Content-Type': 'application/json' },
+            this.authentication = {};
         this.method = "GET";
         this.body = {};
     }
@@ -32,7 +32,7 @@ export default class Fetch {
     url(value = undefined) {
         if (typeof (value) !== "string" || value.trim() === "")
             throw new FetchError(`Input must be an string`);
-        this.endpoint = value.trim().replace(/\/\/*/g, "/");
+        this.endpoint = value.trim().replace(/\/\/*/g, "/"); //remove last slash if exists
         return this;
     }
 
@@ -85,7 +85,7 @@ export default class Fetch {
     auth(value) {
         this.authentication = value;
         if (!["string", "object"].includes(typeof (value)) || Array.isArray(value))
-            throw new FetchError(`Input must be an object or string`);
+            throw new FetchError(`Input must be an object or string `);
         else if (typeof (value) === "string")
             this.authentication = { "Authorization": value };
         this.headers = { ...this.headers, ...this.authentication };
@@ -101,7 +101,7 @@ export default class Fetch {
 
     async execute() {
         if (this.endpoint == undefined || typeof (this.endpoint) !== "string" || this.endpoint.trim() === "")
-            throw new FetchError(`The Url can not be empty or its value is wrong. \nCurrent Value: ${this.endpoint}`);
+            throw new FetchError(`The Url cannot be empty or its value is wrong.\nCurrent Value: ${this.endpoint}`);
 
         const config = {
             method: this.method,
@@ -117,13 +117,15 @@ export default class Fetch {
             url += `/${this.parameter}`;
         }
 
+        if (this.queryString !== "") {
+            url += `?${this.queryString}`;
+        }
         this.reset();
-        const reponse = await fetch(url, config);
-        if (reponse.ok) {
+        const response = await fetch(url, config);
+        if (response.ok) {
             const json = await response.json();
             return json;
         }
         return null;
     }
-
 }

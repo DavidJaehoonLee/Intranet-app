@@ -9,7 +9,6 @@
             <button id="showToastBtn" class="btn btn-warning">Show Toast</button>
         </div>
     </section>
-
     <section>
         <div>
             <h2>Form Control test</h2>
@@ -18,7 +17,6 @@
             <button id="submitBtn">Submit</button>
         </div>
     </section>
-
     <section>
         <div>
             <h2>Message Dialog test</h2>
@@ -27,35 +25,32 @@
             <button onclick="testLoader()">Test MessageLoader</button>
         </div>
     </section>
-
 </main>
 
 <script type="module">
     import Toast, { ToastLength } from '/js/Modules/toast.js';
     import FormControl from '/js/Modules/formControl.js';
+    import MessageDialog from '/js/Modules/MessageDialog.js';
+    import MessageLoader from '/js/Modules/MessageLoader.js';
 
-
-
-    /* Toast tester */
+    /* Toast tester 
+     ----------------------------  */
     document.getElementById('showToastBtn')?.addEventListener('click', () => {
         Toast.warning("This is a toast triggered by button!");
     });
 
-
-    /* FormControl tester */
+    /* FormControl tester 
+     ------------------------------*/
     // Create instance for numeric input with 2 decimal places and maxLength of 10
     const amountControl = new FormControl("amountInput", 2, 10);
-
     // Create instance for email input with no number mask
     const emailControl = new FormControl("emailInput");
-
     // Add custom blur event to show alert if email is invalid
     emailControl.onBlur = (e) => {
         if (!emailControl.areValidEmails) {
             alert("One or more email addresses are invalid.");
         }
     };
-
     // Handle button click
     document.getElementById("submitBtn").addEventListener("click", () => {
         const amount = amountControl.value;
@@ -76,21 +71,19 @@
         alert("Form submitted successfully.");
     });
 
-    import MessageDialog from '/js/Modules/MessageDialog.js';
-    import MessageLoader from '/js/Modules/MessageLoader.js';
 
+    /* MessageDialog tester 
+     ----------------------------*/
     window.testDialog = () => {
         MessageDialog.info("This is an info dialog", "Info Title", () => {
             console.log("Info dialog closed");
         });
-
         setTimeout(() => {
             MessageDialog.confirm("Are you sure you want to proceed?", "Confirmation",
                 () => console.log("Yes clicked"),
                 () => console.log("No clicked")
             );
         }, 2000);
-
         setTimeout(() => {
             MessageDialog.error("Something went wrong", "Error", () => {
                 console.log("Error dialog closed");
@@ -98,14 +91,14 @@
         }, 4000);
     };
 
+    /* MessageLoader tester 
+     ----------------------------*/
     window.testLoader = () => {
         MessageLoader.show("Please wait while we process your request...", "Loading");
-
         setTimeout(() => {
             MessageLoader.message = "Almost there...";
             MessageLoader.title = "Just a Moment";
         }, 2000);
-
         setTimeout(() => {
             MessageLoader.close();
             console.log("Loader closed");
