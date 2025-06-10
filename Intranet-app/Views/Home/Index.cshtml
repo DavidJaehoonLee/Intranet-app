@@ -22,11 +22,9 @@
     <section>
         <div>
             <h2>Message Dialog test</h2>
-            <button onclick="MessageDialog.show('This is a normal message')">Show</button>
-            <button onclick="MessageDialog.error('This is an error!')">Error</button>
-            <button onclick="MessageDialog.warning('This is a warning!')">Warning</button>
-            <button onclick="MessageDialog.success('This was successful!')">Success</button>
-            <button onclick="MessageDialog.confirm('Are you sure?', 'Please confirm', () => alert('Confirmed!'), () => alert('Cancelled'))">Confirm</button>
+            <button onclick="testDialog()">Test MessageDialog</button>
+            <h2>Message Loader test</h2>
+            <button onclick="testLoader()">Test MessageLoader</button>
         </div>
     </section>
 
@@ -35,8 +33,7 @@
 <script type="module">
     import Toast, { ToastLength } from '/js/Modules/toast.js';
     import FormControl from '/js/Modules/formControl.js';
-    import MessageDialog from '/js/Modules/messageDialog.js';
-    window.MessageDialog = MessageDialog;
+
 
 
     /* Toast tester */
@@ -79,6 +76,41 @@
         alert("Form submitted successfully.");
     });
 
+    import MessageDialog from '/js/Modules/MessageDialog.js';
+    import MessageLoader from '/js/Modules/MessageLoader.js';
+
+    window.testDialog = () => {
+        MessageDialog.info("This is an info dialog", "Info Title", () => {
+            console.log("Info dialog closed");
+        });
+
+        setTimeout(() => {
+            MessageDialog.confirm("Are you sure you want to proceed?", "Confirmation",
+                () => console.log("Yes clicked"),
+                () => console.log("No clicked")
+            );
+        }, 2000);
+
+        setTimeout(() => {
+            MessageDialog.error("Something went wrong", "Error", () => {
+                console.log("Error dialog closed");
+            });
+        }, 4000);
+    };
+
+    window.testLoader = () => {
+        MessageLoader.show("Please wait while we process your request...", "Loading");
+
+        setTimeout(() => {
+            MessageLoader.message = "Almost there...";
+            MessageLoader.title = "Just a Moment";
+        }, 2000);
+
+        setTimeout(() => {
+            MessageLoader.close();
+            console.log("Loader closed");
+        }, 4000);
+    };
 
 </script>
 
