@@ -21,6 +21,7 @@
     <Folder Include="Migrations\" />
     <Folder Include="Scripts\" />
     <Folder Include="wwwroot\css\fonts\" />
+    <Folder Include="wwwroot\js\Views\" />
   </ItemGroup>
 
   <ItemGroup>
