@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "ape";
     string marketPlace = "marketPlace";
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<p>Use this page to detail your site's ape.</p>
 
 
 @section scripts {
@@ -187,7 +187,8 @@
                 const amWestDocumentations = allPrograms.filter(p => programCodesSelected.includes(p.LoanProgramCode)).map(p => p.AmWestDocumentation.toString()).flat();
                 onChangeAmWestDocumentationType(amWestDocumentations);
 
-
+                const mortgageTypeCodes = allPrograms.filter(p => programCodesSelected.includes(p.LoanProgramCode)).map(p => p.MortgageType.toString());
+                onChangeLoanType(mortgageTypeCodes);
 
             });
         }, false);
@@ -311,9 +312,254 @@
 
             const refinancePurposes = document.querySelector("div#refinancePurposeControls input:checked")?.value ?? "";
             const occupancyCode = document.querySelector("div#occupanctyControls input:check")?.value;
+            const propertyTypeCode = pricerUtils.toUndefinedIfEmpty(CustomDropDown_cdd_PropertyType.Value());
+            const unitCode = pricerUtils.toUndefinedIfEmpty(CustomDropDown_cdd_NumberUnits.Value());
+            const minFICO = pricerUtils.toUndefinedIfEmpty(CustomInput_ci_NewPricing_FICO.Value());
+            const ltv = pricerUtils.toUndefinedIfEmpty(CustomInput_ci_NewPricing_LTV.Value());
+            const cltv = pricerUtils.toUndefinedIfEmpty(CustomInput_ci_NewPricing_CLTV.Value());
+            const residencyCode = pricerUtils.toUndefinedIfEmpty(CustomDropDown_cdd_ResidencyType.Value());
+            const isLenderFeeWaiver = document.getElementById("chbLenderFeeWaiver").checked;
+            const isDecliningMarket = document.getElementById("chbDecliningMarket").checked;
+            const isInterestOnly = document.getElementById("chbInterestOnly").checked;
+            const isITIN = document.getElementById("chbITIN").checked;
+            const isBuyDown = document.getElementById("chBuydown").checked;
+            const isHortTermRental = document.getElementById("chbShortTermRental").checked;
+
+            var programCategories = [];
+            if (["3", "99", "98", "97"].some(c => mortgageTypeCodes.includes(c))) {
+                if (mortgageTypeCodes.includes("3")) {
+                    programCategories.push("PC_CONV");
+                }
+                if (mortgageTypeCodes.includes("99")) {
+                    programCategories.push("PC_PF");
+                }
+                if (mortgageTypeCodes.includes("99")) {
+                    programCategories.push("PC_PF");
+                }
+                if (mortgageTypeCodes.includes("97")) {
+                    programCategories.push("PC_NCPF");
+                }
+                if (!mortgageTypeCodes.includes("3")) {
+                    mortgageTypeCodes.push("3");
+                }
+
+                mortgageTypeCodes = mortgageTypeCodes.filter(c => !["99", "98", "97"].icludes(c));
+            }
+
+            showOrHideCashOutField();
+
+            const response = await pricerUtils.getFilteredPrograms({
+                loanProgramCode,
+                mortgageTypeCodes: mortgageTypeCodes.join(","),
+                programCategories: programCategories.join(","),
+                amortizationCodes: amortizationCodes.join(","),
+                loanTerms: loanTerms.join(","),
+                amWestDocumentation: amWestDocumentation.join(","),
+                loanPurposeCodes: loanPurposeCodes.join(","),
+                refinancePurposes: refinancePurposes,
+                occupancyCode: occupancyCode,
+                propertyTypeCode,
+                unitCode,
+                minFICO,
+                ltv,
+                cltv,
+                residencyCode,
+                isLenderFeeWaiver,
+                isDecliningMarket,
+                isInterestOnly,
+                isITIN,
+                isBuyDown,
+                isShortTermRental,
+                isProductSelection
+            });
+
+            updateUI(response);
+
+        }
+
+        updateUI = (response) => {
+            const { maxLTV, maxCLTV, minFICO, minLoanAmount, maxLoanAmount } = reponse;
+            programs = response.programs;
+            setSuggestionMessages(maxLTV, maxCLTV, minFICO, minLoanAmount, maxLoanAmount);
+
+        }
+
+        function showOrHideCashOutField() {
+            const isCashout = document.getElementById("rdbRefinancePurposeCashOut").checked;
+
+            if (isCashout) {
+                CustomInput_ci_NewPricing_CashOutAmount.Get().parentNode.style.display = "";
+            } else {
+                CustomInput_ci_NewPricing_CashOutAmount.Get().parentNode.style.display = "none";
+                document.getElementById("NewPricing_CashOutAmount").value = "";
+            }
+        }
+
+        setSuggestionMessages = (maxLTV, maxCLTV, minFICO, minLoanAmount, maxLoanAmount) => {
+            const messageTypeLTV = ((parseFloat(maxLTV) < parseFloat(CustomInput_ci_NewPricing_LTV.Value())) || maxLTV == 0) && CustomInput_ci_NewPricing_LTV.Value() != "Infinity" ? "error" : "info";
+            var messageLTV = `LTV<=${parseFloat(maxLTV).toFixed(2) ?? "--"}`;
+
+            const messageTypeCLTV = ((parseFloat(maxCLTV) < parseFloat(CustomInput_ci_NewPricing_CLTV.Value())) || maxCLTV == 0) && CustomInput_ci_NewPricing_LTV.Value() != "Infinity" ? "error" : "info";
+            var messageCLTV = `CLTV<=${parseFloat(maxCLTV).toFixed(2) ?? "--"}`;
+
+            const messageTypeFICO = (parseFloat(minFICO) > parseFloat(CustomInput_ci_NewPricing_LTV.Value())) || minFICO == 0 ? "error" : "info";
+            var messageFICO = `FICO >= ${parseInt(minFICO) ?? "--"}`;
+
+            var mortgageTypeCodes = Array.from(document.querySelectorAll("div#loanTypeControls input:checked")).map(el => el.value);
+            var messageTypeLoanAmount = "info";
+            var messageLoanAmount = `Amount >= ${formatCurrency(minLoanAmount)}
+                                     Amount <= ${formatCurrency(maxLoanAmount)}`;
+
+            if ((mortgageTypeCodes.length > 0 && mortgageTypeCodes.every(c => ["2", "4"].includes(c))) || ([minLoanAmount, maxLoanAmount].includes(-2))) {
+                messageTypeLoanAmount = "info";
+                messageLoanAmount = "Please review the guielines";
+            } else if (parseFloat(minLoanAmount) == -1 || parseFloat(maxLoanAmount) == -1) {
+                messageTypeLoanAmount = "error";
+                messageLoanAmount = CustomInput_ci_NewPricing_BaseLoanAmount.Get().querySelector(".cstm-msg")?.querySelector("p")?.textContent;
+            } else if (parseFloat(minLoanAmount) > parseFloat(CustomInput_ci_NewPricing_BaseLoanAmount.Value())
+                    || parseFloat(maxLoanAmount) < parseFloat(CustomInput_ci_NewPricing_BaseLoanAmount.Value())
+            ) {
+                messageTypeLoanAmount = "error";
+            }
+
+            if (maxLTV == 0) {
+                messageLTV = CustomInput_ci_NewPricing_LTV.Get().querySelector(".cstm-msg")?.querySelector("p")?.textContent ?? "";
+                messageCLTV = CustomInput_ci_NewPricing_CLTV.Get().querySelector(".cstm-msg")?.querySelector("p")?.textContent ?? "";
+                messageFICO = CustomInput_ci_NewPricing_FICO.Get().querySelector(".cstm-msg")?.querySelector("p")?.textContent ?? "";
+            }
+
+            CustomInput_ci_NewPricing_LTV.Message(messageTypeLTV, `${messageLTV}`);
+            CustomInput_ci_NewPricing_CLTV.Message(messageTypeCLTV, `${messageCLTV}`);
+            CustomInput_ci_NewPricing_FICO.Message(messageTypeFICO, `${messageFICO}`);
+            CustomInput_ci_NewPricing_BaseLoanAmount.Message(messageTypeLoanAmount, `${messageLoanAmount}`);
+
+            triggerCashOutMessage();
+        }
+
+        function triggerCashOutMessage() {
+            //------ Cash Out Message
+            const selectedPrograms = allPrograms.filter(p => progamCodesSelected.includes(p.LoanProgramCode));
+            const mortgageTypes = selectedPrograms.map(p => p.MortgageType.toString());
+            const hasNonQM = mortgageTypes.includes("99");
+
+            CustomInput_ci_NewPricing_CashOutAmount.RemoveMessage();
+            if (hasNonQM && CustomInput_ci_NewPricing_CashOutAmount.Get().parentNode.style.display == ""
+                && Number(CustomInput_ci_NewPricing_LTV.Value()) > Number(65)
+                && CustomInput_ci_NewPricing_CashOutAmount.Value() > Number(500000)
+            ) {
+                CustomInput_ci_NewPricing_CashOutAmount.Message("error", "Amount cannot be over $500k for LTV > 65%");
+            }
+        }
+
+        //------- OnChanges
+        onChangeLoanType = (values) => {
+            if (marketPlace !== "PRIVATELENDING") {
+                loadCompensationInfo(compensation);
+            }
+
+            if (["99", "98", "6"].some(v => values.includes(v))) {
+                document.getElementById("chbRuralProperty").parentNode.parentNode.style.display = "";
+                document.getElementById("chbDecliningMarket").parentNode.parentNode.style.display = "";
+
+            }
 
 
         }
+
+        onChangeAmWestDocumentationType = (values) => {
+            if (values.includes("12")) {
+                CustomInput_ci_DebtCoverageRatio.Get().parentNode.style.display = "";
+            } else {
+                CustomInput_ci_DebtCoverageRatio.Get().parentNode.style.display = "none";
+            }
+        }
+
+
+        function loanCompensationInfo(data) {
+            if (data.EnabledCompPlanList) {
+                //Show message indicating there is no compensation plan in the system yet
+                document.getElementById("CompensationPlan").value = "";
+                document.getElementById("CompensationAmount").value = "";
+                document.getElementById("CompensationMax").value = "";
+
+                if (marketPlace == "WHOLESALE") {
+                    document.getElementById("RefiCompensationPlan").value = "";
+                    document.getElementById("RefiCompensationAmount").value = "";
+                    document.getElementById("RefiCompensationMax").value = "";
+
+                    document.getElementById("JuniorCompensationPlan").value = "";
+                    document.getElementById("JuniorCompensationAmount").value = "";
+                }
+            } else {
+                let loanAmount = CustomInput_ci_NewPricing_BaseLoanAmount.Value();
+                if (isNaN(loanAmount)) loanAmount = 0;
+
+                if (marKetPlace == "WHOLESALE") {
+                    // Regular Comp
+                    let compensationAmount = loanAmount * data.CompPlan.replace(/^0-9\./g, "") / 100;
+                    document.getElementById("CompensationText").textContent = `${data.Complan !== "" ? data.Complan : "---"} | ${compensationAmount > 0 ? formatCurrency(compensationAmount) : "---"} | Max: ${data.CompensationMax !== "" ? data.CompensationMax : "---"}`;
+                    document.getElementById("CompensationPlan").value = data.Complan.replace(/^0-9\./g, "");
+                    document.getElementById("CompensationAmount").value = compensationAmount;
+                    document.getElementById("CompensationMax").value = data.CompensationMax.replace(/[^0-9\.]/g, "");
+
+                    // Refi Comp
+                    let refiCompensationAmount = loanAmount * data.RefiCompPerc / 100;
+                    document.getElementById("RefiCompensationText").textContent = `${data.RefiCompPerc > 0 ? data.RefiCompPerc.toFixed(3) : "---"} | ${refiCompensationAmount > 0 ? formatCurrency(refiCompensationAmount) : "---"} | Max: ${data.RefiCompMaxAmount > 0 ? formatCurrency(data.RefiCompMaxAmount) : "---"}`;
+                    document.getElementById("RefiCompensationPlan").value = data.RefiCompPerc;
+                    document.getElementById("RefiCompensationAmount").value = loanAmount * data.RefiCompPerc / 100;
+                    document.getElementById("RefiCompensationMax").value = data.RefiCompMaxAmount;
+
+                    //Junior Comp
+                    let juniorCompensationAmount = loanAmount * data.JuniorLPCPerc / 100;
+                    document.getElementById("JuniorCompensationText").textContent = `${data.JuniorLPCPerc > 0 ? data.JuniorLPCPerc.toFixed(3) + "%" : "---"} | ${juniorCompensationAmount > 0 ? formatCurrency(juniorCompensationAmount) : "---"} | Max: ---`;
+                    document.getElementById("JuniorCompensationPlan").value = data.JuniorLPCPerc;
+                    document.getElementById("JuniorCompensationAmount").value = juniorCompensationAmount;
+                } else {
+                    let compensationAmount = loanAmount * data.CompPlan.replace(/[^0-9\.]/g, "") / 100;
+                    document.getElementById("CompensationText").textContent = `${data.CompPlan !== "" ? data.CompPlan : "---"} | ${compensationAmount > 0 ? formatCurrency(compensationAmount) : "---"}`;
+                    document.getElementById("MaxCompensationText").textContent = `${data.CompensationMax !== "" ? data.CompensationMax : "---"}`;
+                    document.getElementById("CompensationPlan").value = data.CompPlan.replace(/[^0-9\.]/g, "");
+                    document.getElementById("CompensationAmount").value = compensationAmount;
+                    document.getElementById("CompensationMax").value = data.CompensationMax.replace(/[^0-9\.]/g, "");
+                }
+
+                //custom warning message
+                let showWarning = false;
+                let warningText = "";
+                let count = 0;
+                const warningCompensation = document.getElementById("warning-compensation");
+                warningCompensation.style.display = "none";
+
+                if (data.CompPlan === "") {
+                    warningText += "Compensation";
+                    showWarning = true;
+                    count++;
+                }
+
+                if (marketPlace == "WHOLESALE") {
+                    if (data.RefiCompPerc == 0) {
+                        warningText += (warningText !== "" ? " and " : "");
+                        warningText += "Refi Compensation";
+                        showWarning = true;
+                        count++;
+                    }
+
+                    if (data.JuniorLPCPerc == 0) {
+                        warningText += (warningText !== "" ? " and " : "");
+                        warningText += "Jr Compensation";
+                        showWarning = true;
+                        count++;
+                    }
+                }
+
+                if (showWarning) {
+                    warningCompensation.style.display = "";
+                    warningCompensation.querySelector("p > strong").textContent = warningText;
+                    warningCompensation.querySelector("p > span").textContent = count < 2 ? "is" : "are";
+                }
+            }
+        }
+
 
     </script>
 }
