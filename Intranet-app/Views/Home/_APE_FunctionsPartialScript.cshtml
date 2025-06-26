@@ -4,6 +4,12 @@
 
         this.toUndefinedIfEmpty = (value) => value == undefined || value == "undefined" || value.toString().trim() == "" ? undefined : value;
 
+        this.getFilteredPrograms = async (filters) => {
+            const url = '@Url.Action("FilterPrograms", "Home")';
+            return await jsonFetchAsPOST(url, filters);
+        };
+
+
     }
 
 
