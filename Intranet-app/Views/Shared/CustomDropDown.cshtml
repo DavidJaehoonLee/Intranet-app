@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Linq.Expressions
+@using Intranet_app.Helpers
+
+@functions {
+    public static IHtmlContent CreateFor<TModel, TProperty>(
+        IHtmlHelper<TModel> html,
+        Expression<Func<TModel, TProperty>> expression,
+        IEnumerable<SelectListItem> selectList,
+        object properties = null)
+    {
+        var name = AwfHtmlHelper.GetName(expression);
+        var value = AwfHtmlHelper.GetValue(expression, html.ViewData.Model);
+        return Create(name, value, selectList, properties);
+    }
+
+    public static IHtmlContent CreateFor<TModel, TProperty>(
+        IHtmlHelper<TModel> html,
+        Expression<Func<TModel, TProperty>> expression,
+        object properties = null)
+    {
+        var name = AwfHtmlHelper.GetName(expression);
+        var value = AwfHtmlHelper.GetValue(expression, html.ViewData.Model);
+        return Create(name, value, null, properties);
+    }
+
+    public static IHtmlContent Create(string modelName, string value, object properties = null)
+    {
+        var input = $"<input name=\"{modelName}\" value=\"{value}\" />";
+        return new HtmlString(input);
+    }
+}
+
+

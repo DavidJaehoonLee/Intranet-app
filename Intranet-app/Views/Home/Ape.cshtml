@@ -11,13 +11,14 @@
     @Html.Partial("_APE_FunctionsPartialScript")
 
     <script type="text/javascript">
-        var dropDrownOptions = {
+        var dropDownOptions = {
             amWestDocumentationCodeNames: [],
-            armotizationCodeNames: [],
+            amortizationCodeNames: [],
             lienPositionCodeNames: [],
+            loanPurposeCodenames: [],
             loanTermCodeNames: [],
-            mortgageTypeCodeNames: [],
-            occupancyCodeNames: [],
+            mortgageTypeCodeName: [],
+            occupancyCodeName: [],
             propertyTypeCodeNames: [],
             refinancePurposeCodeNames: [],
             unitCodeNames: [],
@@ -192,6 +193,65 @@
 
             });
         }, false);
+
+        CustomDropDown_cdd_PropertyType.OnChange(() => {
+            const value = CustomDropDown_cdd_PropertyType.Value();
+            onChangePropertyType(value);
+            filterPrograms;
+        });
+
+        CustomDropDown_cdd_NumberUnits.OnChange(() => filterPrograms());
+
+        CustomDropDown_cdd_ResidencyType.OnChange(() => {
+            const value = CustomDropDown_cdd_ResidenceType.Value();
+            onChangeResidencyType(value);
+            filterPrograms();
+        });
+
+        CustomInput_ci_NewPricing_FICO.OnBlur(() => filterPrograms());
+
+        CustomInput_ci_NewPricing_AppraisalValue.OnBlur(() => {
+            const value = CustomInput_ci_NewPricing_AppraisalValue.Value();
+            const valuePurchasePrice = pricerUtils.toUndefinedIfEmpty(CustomInput_ci_NewPricing_PurchasePrice.Value());
+            if (!valuePurchasePrice)
+                CustomInput_ci_NewPricing_PurchasePrice.Value(value);
+
+            triggerChangesForLTVsInputs();
+            filterPrograms();
+            checkMortgageInsurance();
+
+            if (value != "" && !isNaN(value) && parseFloat(value) > 0) {
+                CustomInput_ci_NewPricing_LTV.Enable();
+            } else {
+                CustomInput_ci_NewPricing_LTV.Disabled();
+            }
+        });
+
+        CustomInput_ci_NewPricing_PurchasePrice.OnBlur(() => {
+            triggerChangesForLTVsInputs();
+            filterPrograms();
+            checkMortgageInsurance();
+        });
+
+        CustomInput_ci_NewPricing_BaseLoanAmount.OnBlur(() => {
+            triggerChangesForLTVsInputs();
+            filterPrograms();
+
+            if (marketPlace !== "PRIVATELENDING") {
+                loanCompensationInfo(compensation);
+            }
+            checkMortgageInsurance();
+        });
+
+        CustomInput_ci_NewPricing_FirstLienAmount.OnBlur(() => {
+            triggerChangesForLTVsInputs();
+            filterPrograms();
+        });
+
+        CustomInput_ci_NewPricing_SubordinateLienAmount.OnBlur(() => {
+            triggerChangesForLTVsInputs();
+            filterPrograms();
+        });
 
         // Loan program setting
         selectProgramSettings = async (loanProgramCode = undefined) => {
@@ -457,13 +517,33 @@
                 loadCompensationInfo(compensation);
             }
 
-            if (["99", "98", "6"].some(v => values.includes(v))) {
+            if (["99", "98", "6"].some(v => values.includes(v))) { // IF 99=Non-QM, 98= Closed End Second, 6 = HELOC
                 document.getElementById("chbRuralProperty").parentNode.parentNode.style.display = "";
                 document.getElementById("chbDecliningMarket").parentNode.parentNode.style.display = "";
 
+                const isDecliningMarket = document.getElementById("chbDecliningMarket").checked
+                document.getElementById("chbDecliningMarket").checked = isDecliningMarket;
+            } else {
+                document.getElementById("chbRuralProperty").parentNode.parentNode.style.display = "none";
+                document.getElementById("chbDecliningMarket").parentNode.parentNode.style.display = "none";
+                document.getElementById("chbDecliningMarket").checked = false;
             }
 
+            if (values.includes("98")) { // 98= Closed End Second
+                CustomInput_ci_NewPricing_FirstLienAmount.Get().parentNode.style.display = "";
 
+                CustomInput_ci_NewPricing_SubordinateLienAmount.Value("");
+                CustomInput_ci_NewPricing_SubordinateLienAmount.Get().parentNode.style.display = "none";
+            } else {
+                CustomInput_ci_NewPricing_FirstLienAmount.Value("");
+                CustomInput_ci_NewPricing_FirstLienAmount.Get().parentNode.style.display = "none";
+
+                CustomInput_ci_NewPricing_SubordinateLienAmount.Get().parentNode.style.display = "";
+                CustomInput_ci_NewPricing_SubordinateLienAmount.Value("");
+                triggerChangesForLTVsInputs();
+            }
+
+            checkMortgageInsurance();
         }
 
         onChangeAmWestDocumentationType = (values) => {
@@ -560,6 +640,142 @@
             }
         }
 
+        function checkMortgageInsurance() {
+            let loanTypes = allPrograms.filter(p => programCodesSelected.includes(p.LoanProgramCode))?.map(p => p.MortgageType.toString()) ?? [];
+
+            //show
+            document.getElementById("MortgageInsuranceSection").style.display = "";
+
+            // Non QM | Closed End Second (CES) | HELOC
+            if (loanTypes.some(lt => ["99", "98", "6"].includes(lt))) {
+                CustomDropDown_cdd_NewPricing_MortgageInsurance.Value(3);
+            }
+
+            let loanAmount = CustomInput_ci_NewPricing_BaseLoanAmount.Value();
+
+            //if Loan type is Closed End Second (CES) or NON QM and Loan Amount is empty then the process is finished
+            if (loanTypes.some(lt => ["99", "98"].includes(lt)) && !loanAmount)
+                return;
+
+            let ltv = CustomInput_ci_NewPricing_LTV.Value();
+            let cltv = CustomInput_ci_NewPricing_CLTV.Value();
+
+            if (ltv != "" || cltv != "") {
+                if (parseFloat(ltv) <= 80 || parseFloat(cltv) <= 80) {
+                    CustomDropDown_cdd_NewPricing_MortgageInsurance.Value(3);
+                    //hide
+                    document.getElementById("MortgageInsuranceSection").style.display = "none";
+                    document.getElementById("MortgageInsuranceRemainder").style.display = "none";
+                } else if (loanTypes.includes("3")) {//Conventional
+                    document.getElementById("MortgageInsuranceRemainder").style.display = "";
+                }
+            }
+        }
+
+        onChangePropertyType = (value) => {
+            const element_cddNumberOfUnits = CustomDropDown_cdd_NumberUnits.Get();
+            const element_chbNonWarrantableCondo = document.getElementById("chbNonWarrantableCondo");
+            if (["1", "2", "6"].includes(value)) { //If 1=Detached, 2=Attached, 6=PUD
+                element_cddNumberOfUnits.parentNode.style.display = "";
+                element_chbNonWarrantableCondo.parentNode.parentNode.style.display = "none";
+                element_chbNonWarrantableCondo.checked = false;
+
+            } else if (["3", "4", "5"].includes(value)) { // 3=condominium, 4=HighRiseCondo, 5=DetachedCondo
+                element_cddNumberOfUnits.parentNode.style.display = "none";
+                element_chbNonWarrantableCondo.parentNode.parentNode.style.display = "";
+                CustomDropDown_cdd_NumberUnits.Value("");
+            }
+        }
+
+        onChangeResidencyType = (value) => {
+            const element_ci_NewPricing_FICO = CustomInput_ci_NewPricing_FICO.Get();
+            if (value == "31") {
+                CustomInput_ci_NewPricing_FICO.Value("");
+                element_ci_NewPricing_FICO.parentNode.style.display = "none";
+            }
+            else {
+                element_ci_NewPricing_FICO.parentNode.style.display = "";
+            }
+        }
+
+        triggerChangesForLTVsInputs = () => {
+            const appraisalValue = CustomInput_ci_NewPricing_AppraisalValue.Value();
+            var purchasePrice = CustomInput_ci_NewPricing_PurchasePrice.Value();
+            const baseLoanAmount = CustomInput_ci_NewPricing_BaseLoanAmount.Value();
+            const firstLienAmount = CustomInput_ci_NewPricing_FirstLienAmount.Value();
+            const subordinateLienAmount = CustomInput_ci_NewPricing_SubordinateLienAmount.Value();
+
+            if (CustomInput_ci_NewPricing_PurchasePrice.Get().parentNode.style.display == "none") {
+                purchasePrice = undefined;
+            }
+
+            const { ltv, cltv, hcltv } = pricerUtils.calculate_LTV_CLTV_HCLTV(
+                appraisalValue, purchasePrice, baseLoanAmount, firstLienAmount, subordinateLienAmount);
+
+            if (!isNaN(ltv))
+                CustomInput_ci_NewPricing_LTV.Value(ltv);
+            if (!isNaN(cltv))
+                CustomInput_ci_NewPricing_CLTV.Value(cltv);
+            if (!isNaN(hcltv))
+                CustomInput_ci_NewPricing_HCLTV.Value(hcltv);
+
+            return { ltv, cltv, hcltv };
+        }
+
+        setDropDownsToDefalut = () => {
+            // Create Loan Types (Mortgage Types) Checkbox
+            const loanTypeControls = document.getElementById("loanTypeControls");
+            loanTypeControls.innerHTML = "";
+            dropDropOptions.mortgageTypeCodeNames.forEach(c => {
+                const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, "chbLoanType", `chbLoanType${c.code}`, c.code, () => {
+                    const mortgageTypes = []
+                    document.querySelectorAll(`input[name="chbLoanType"]:checked`).forEach(el => mortgageTypes.push(el.value));
+
+                    if (["98", "6"].some(v => mortgageTypes.includes(v))) {
+                        document.getElementById("rdbLoanPurpose2").click();
+                    }
+
+                    if (mortgageTypes.includes("98")) {
+                        document.getElementById("rdbRefinancePurposeCashOut").click();
+                        document.getElementById("rdbRefinancePurposeNoCashOut").setAttribute("disabled", "disabled");
+                    } else {
+                        document.getElementById("rdbRefinancePurposeNoCashOut").removeAttribute("disabled");
+                    }
+
+                    filterPrograms();
+                });
+                loanTypeControls.append(label);
+            });
+
+            // Create Amortization Checkbox
+            const amortizationControls = document.getElementById("amortizationControls");
+            amortizationControls.innerHTML = "";
+            dropDownOptions.amortizationCodeNames.forEach(c => {
+                const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, "chbAmortization", `chbAmortization${c.code}`, c.code, filterPrograms);
+                amortizationControls.append(label);
+            });
+
+            // Create Interest Only Checkbox and append it to Amorization Controls
+            {
+                const label = pricerUIUtils.createLabelWithCheckBoxControl();
+                amortizationControls.append(label);
+            }
+
+            const amWestDocumentationTypeControls = document.getElementById("amWestDocumentationTypeControls");
+            amWestDocumentationTypeControls.innerHTML = "";
+            dropdownOptions.amWestDocumentationCodeNames.forEach(c => {
+                if (c.code != 10) { // If not Refi-second
+                    const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, "chbDocType", `chbAmWestDocType${c.code}`, c.code, filterPrograms);
+                    amWestDocumentationTypeControls.append(label);
+                }
+            });
+
+
+
+
+
+
+        }
 
     </script>
 }
