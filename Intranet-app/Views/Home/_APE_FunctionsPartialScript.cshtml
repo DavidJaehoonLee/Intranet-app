@@ -9,6 +9,28 @@
             return await jsonFetchAsPOST(url, filters);
         };
 
+    }
+
+    var pricerUIUtils = new function () {
+
+        this.createLabelWithCheckBoxControl = (labelText, inputName, inputId, inputValue, inputClickListener = (htmlInputElement, mouseEvent)) => {
+            const label = document.createElement("label");
+            label.htmlFor = inputId;
+            label.style.fontWeight = "normal";
+            label.style.userSelect = "none";
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.name = inputName;
+            input.id = inputName;
+            input.value = inputValue;
+            input.addEventListener('click', (el, me) => {
+                inputClickListener(el, me);
+            });
+            label.append(input);
+            label.append(labelText);
+
+            return label;
+        }
 
     }
 
