@@ -770,10 +770,67 @@
                 }
             });
 
+            // Create Additional Checkboxes and append them to Doc. Type Controls
+            {
+                const labelITIN = pricerUIUtils.createLabelWithCheckBoxControl("ITIN", `chITIN`, `chbITIN`, 'ITIN', filterPrograms);
+                amWestDocumentationTypeControls.append(labelITIN);
+            }
 
+            const otherTypeControls = document.getElementById("otherTypeControls");
+            otherTypeControls.innerHTML = "";
+            // Create Additional checkboxes and append them to the Other type controls
+            {
+                const labelBuydown = pricerUIUtils.createLabelWithCheckBoxControl('Buydown', `chbBuydown`, `chbBuydown`, 'Buydown', filterPrograms);
+                otherTypeControls.append(labelBuydown);
 
+                const labelShortTermRental = pricerUIUtils.createLabelWithCheckBoxControl('Short Term Rental', `chbShortTermRental`, `chbShortTermRental`, 'shortTermRental', filterPrograms);
+                labelShortTermRental.append(labelShortTermRental);
+            }
 
+            // Create Loan Purpose Checkbox
+            const loanPurposeControls = document.getElementById("loanPurposeControls");
+            loanPurposeControls.innerHTML = "";
+            dropDownOptions.loanPurposeCodenames.forEach(c => {
+                if (c.code != 10) { // If not Refi-second
+                    const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, `rdbLoanPurposes`, `rdbLoanPurpose${c.code}`, c.code, (el) => {
+                        const mortgageTypes = [];
+                        document.querySelectorAll(`input[name="chbLoanType"]:checked`).forEach(el => mortgageTypes.push(el.value));
 
+                        if (el.target.value == "1" && el.target.checked) {
+                            if (["98", "6"].some(v => mortgageTypes.includes(v))) {
+                                document.getElementById("rdbLoanPurpose2").checked = true;
+                                return;
+                            }
+                            CustomInput_ci_NewPricing_PurchasePrice.Value("");
+                            CustomInput_ci_NewPricing_PurchasePrice.Get().parentNode.style.display = "";
+                            document.getElementById("refinancePurposeControls").parentNode.style.display = "none";
+                            document.querySelectorAll("div#refinancePurposeControls input:checked").forEach(el => el.checked = false);
+                            document.querySelectorAll("div#refinancePurposeControls input").forEach(el => el.setAttribute("disabled", "disabled"));
+                        } else if (el.target.value == "2" && el.target.checked) {
+                            CustomInput_ci_NewPricing_PurchasePrice.Value("");
+                            document.getElementById("refinancePurposeControls").parentNode.style.display = "";
+                            CustomInput_ci_NewPricing_PurchasePrice.Get().parentNode.style.display = "none";
+                            document.querySelectorAll("div#refinancePurposeControls input").forEach(el => el.removeAttribute("disabled"));
+                        }
+
+                        triggerChangesForLTVsInputs();
+                        filterPrograms();
+                    });
+                    loanPurposeControls.append(label);
+                }
+            });
+
+            DropDownCascading_ddc_Product.SetDataFilter(dropDownOptions.mortgageTypeCodeName); //load filter list (mortgage types)
+
+            const refinancePurposeControls = document.getElementById("refinancePurposeControls");
+            refinancePurposeControls.innerHTML = "";
+            const refinancePurpose = [];
+            refinancePurpose.push(new CodeName({ Code: "CashOut", Name: "Cash Out" }));
+            refinancePurpose.push(new CodeName({ Code: "NoCashOut", Name: "No Cash Out/Rate & Term" }));
+            refinancePurpose.forEach(c => {
+                const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, `rdbRefinancePurposes`, `rdbRefinancePurpose${c.code}`, c.code, filterPrograms);
+                refinancePurposeControls.append(label);
+            });
 
         }
 

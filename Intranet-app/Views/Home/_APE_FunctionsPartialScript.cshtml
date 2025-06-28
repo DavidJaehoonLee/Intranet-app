@@ -32,6 +32,26 @@
             return label;
         }
 
+        this.createLabelWithRadioControl = (labelText, inputName, inputId, inputValue, inputClickListener = (htmlInputElement, event)) => {
+            const label = document.createElement("label");
+            label.htmlFor = inputId;
+            label.style.fontWeight = "normal";
+            label.style.userSelect = "none";
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = inputName;
+            input.id = inputId;
+            input.value = inputValue;
+            input.style.opacity = 1;
+            input.addEventListener("change", (el, me) => {
+                inputClickListener(el, me);
+            });
+            label.append(input);
+            label.append(labelText);
+
+            return label;
+        }
+
     }
 
 
