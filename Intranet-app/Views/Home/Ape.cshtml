@@ -828,11 +828,196 @@
             refinancePurpose.push(new CodeName({ Code: "CashOut", Name: "Cash Out" }));
             refinancePurpose.push(new CodeName({ Code: "NoCashOut", Name: "No Cash Out/Rate & Term" }));
             refinancePurpose.forEach(c => {
-                const label = pricerUIUtils.createLabelWithCheckBoxControl(c.Name, `rdbRefinancePurposes`, `rdbRefinancePurpose${c.code}`, c.code, filterPrograms);
+                const label = pricerUIUtils.createLabelWithRadioControl(c.Name, `rdbRefinancePurposes`, `rdbRefinancePurpose${c.code}`, c.code, filterPrograms);
                 refinancePurposeControls.append(label);
             });
 
+            const occupancyControls = document.getElementById("occupancyControls");
+            occupancyControls.innerHTML = "";
+            dropdownOptions.occupancyCodeName.forEach(c => {
+                const label = pricerUIUtils.createLabelWithRadioControl(c.Name, `rdbOccupancy`, `rdbOccupancy${c.code}`, c.code, filterPrograms);
+                occupancyControls.append(label);
+            });
+
+            CustomDropDown_cdd_PropertyType.Data(dropDownOptions.propertyTypeCodeNames);
+            CustomDropDown_cdd_PropertyType.RemoveMessage();
+            CustomDropDown_cdd_NumberUnits.Get().parentNode.style.display = "none";
+            CustomDropDown_cdd_NumberUnits.Data(dropDownOptions.unitCodeNames);
+            CustomDropDown_cdd_NumberUnits.RemoveMessage();
+            CustomDropDown_cdd_State.Value("");
+            CustomDropDown_cdd_State.RemoveMessage();
+            CustomDropDown_cdd_County.Data([]);
+            CustomDropDown_cdd_County.RemoveMessage();
+            CustomDropDown_cdd_ResidenceType.Data(dropDownOptions.residencyCodeNames);
+            CustomDropDown_cdd_ResidenceType.RemoveMessage();
         }
+
+        filterDropDowns = (codeNames) => {
+            const residencyCodeNames = dropDownOptions.residencyCodeNames.filter(c => Array.from(codeNames.residencyCodeNames).includes(c.code));
+            const propertyTypeCodeNames = dropdownOptions.propertyTypeCodeNames.filter(c => Array.from(codeNames.propertyTypeCode)).includes(c.code);
+            const unitCodeNames = dropdownOptions.unitCodeNames.filter(c => Array.from(codeNames.unitCodeNames).includes(c.code));
+
+            let value = undefined;
+            value = CustomDropDown_cdd_ResidenceType.Value();
+            CustomDropDown_cdd_ResidenceType.Data(residencyCodeNames);
+            CustomDropDown_cdd_ResidenceType.Value(value);
+
+            if (residencyCodeNames.length == 1) {
+                value = residencyCodeNames[0].Code;
+                CustomDropDown_cdd_ResidenceType.Value(value);
+                onChangeResidencyType(value.toString());
+            }
+
+            if (!residencyCodeNames.some(c => c.code == 31)) {
+                CustomDropDown_cdd_ResidenceType.Message("info", "Foreign National if not allowed");
+            } else {
+                CustomDropDown_cdd_ResidenceType.RemoveMessage();
+            }
+        }
+
+        onClickCheckBox = async (el) => {
+
+            const code = el.dataset.id;
+            if (el.checked) {
+                if (programCodesSelected.length < 3) {
+                    programCodesSelected.push(code);
+
+                    const ul = document.querySelector("#programCodesSelectedContainer > ul");
+                    ul.innerHTML = "";
+                    programCodesSelected.forEach((pc, index) => {
+                        const li = document.createElement("li");
+                        const span = document.createElement("span");
+                        span.innerHTML = "&#10006;";
+                        li.textContent = pc;
+                        li.appendChild(span);
+                        li.id = `selectedCode_${pc}`;
+                        li.dataset.id = pc;
+                        li.addEventListener("click", () => {
+                            progamCodesSelected = programCodesSelected.filter(c => c != pc);
+                            const el = document.getElementById(li.id);
+                            ur.removeChild(el);
+                            setTableProductsThatMatch(programs);
+
+                            if (programCodesSelected.length > 0)
+                                document.getElementById("programCodesSelectedContainer").style.display = "";
+                            else
+                                document.getElementById("programCodesSelectedContainer").style.display = "none";
+
+                            const programsFiltered = allPrograms.filter(p => programCodesSelected.includes(p.LoanProgramCode));
+                            const mortgageTypes = programsFiltered.map(p => p.MortgageType.toString());
+                            if (!mortgageTypes.includes("6")) {
+                                document.getElementById("helocPositioDiv").style.display = "none";
+                            }
+
+                            const amWestDocumentations = programsFiltered.map(p => p.AmWestDocumentation.toString()).flat();
+                            onChangeAmWestDocumentationType(amWestDocumentations);
+
+                            additionalOptionFields = additionalOptionFields.filter(f => f.LoanProgramCode != pc);
+                            updateAdditionalOptionFields();
+
+                            if (marketPlace !== "PRIVATELENDING") {
+                                loadCompensationInfo(compensation);
+                            }
+
+                            showOrHideCashOutField(mortgageTypes)
+                        });
+
+                        ul.appendChild(li);
+                    });
+
+                    const program = allPrograms.find(p => p.LoanProgramCode == code);
+                    document.getElementById("rdbHELOCPositionFirst").checked = false;
+                    document.getElementById("rdbHELOCPositionSecond").checked = false;
+
+                    if (program && program.MortgageType == 6) {
+                        document.getElementById("helocPositionDiv").style.display = "";
+                    }
+
+                    const additionalFields = await pricerUtils.getAdditionalOptionFields(code);
+                    Array.from(additionalFields).forEach(a => additionalOptionFields.push(a));
+                } else {
+                    el.checked = false;
+                }
+            } else {
+                programCodesSelected = programCodesSelected.filter(c => c != code);
+                additionalOptionFields = additionalOptionFields.filter(f => f.LoanProgramCode != code);
+
+                const ul = document.querySelector("#programCodesSelectedContainer > ul");
+                const el = document.getElementById(`selectedCode_${code}`);
+                if (el)
+                    ul.removeChild(el);
+
+                if (isProductSelection) {
+                    isProductSelection = false;
+                    DropDownCascading_ddc_Product.Reset();
+                    selectProgramSettings();
+                    filterPrograms();
+                }
+            }
+
+            const programsFiltered = allPrograms.filter(p => programCodesSelected.includes(p.LoanProgramCode));
+            const amWestDocumentations = programsFiltered.map(p => p.AmWestDocumentation.toString()).flat();
+            const mortgageTypes = programsFiltered.map(p => p.MortgageType.toString());
+
+            onChangeAmWestDocumentationType(amWestDocumentations);
+            updateAdditionalOptionFields();
+
+            if (!mortgageTypes.includes("6")) {
+                document.getElementById("helocPositionDiv").style.display = "none";
+            }
+
+            onChangeLoanType(mortgageTypes);
+
+            if (programCodesSelected.length > 0)
+                document.getElementById("programCodesSelectedContainer").style.display = "";
+            else
+                document.getElementById("programCodesSelectedContainer").style.display = "none";
+
+            if (marketPlace != "PRIVATELENDING") {
+                loadCompensationInfo(compensation);
+            }
+
+            showOrHideCashOutField(mortgageTypes);
+        }
+
+        updateAdditionalOptionFields = () => {
+            const divInputs = getDivAdditionalOptionFields();
+            const filteredFields = [];
+            additionalOptionFields.filter(predicateAdditionalOptionFields)
+                .forEach(f => {
+                    if (!filteredFields.some(of => of.PricerFieldName == f.PricerFieldName))
+                        filteredFields.push(f);
+                });
+
+            divInputs.innerHTML = filteredFields.map(f => {
+                var field = new AdditionalOptionField(f);
+                if (field.InputType == "Checkbox") {
+                    return templateYandN_asCheckbox.replace("{LabelControl}", field.CodeName)
+                        .replaceAll("{name}", field.PricerFieldName)
+                        .replace("{value}", field.PricerFieldName)
+                } else if (field.InputType == "Select") {
+                    return `<div style="width: 250px; margin-bottom: 5px;">
+                                <label style="user-select: none">
+                                    ${field.CodeName}
+                                </label>
+                                <select id=${field.PricerFieldName} name="${field.PricerFieldName}" data-additional="true">
+                                    ${field.Options.map(c => `<option value="${c.CodeValue}">${c.CodeName}</option>`).join("")}
+                                </select>
+                            </div>`
+                } else {
+                    return pricerUtils.createAdditionalFieldControl(field.InputType, field.CodeName, field.PricerFieldName, "", field.IsRequired).outerHTML;
+                }
+            }).join("");
+
+            divInputs.innerHTML += getHardcodedAdditionalOptionFields();
+
+            if (filteredFields.length > 0) {
+                document.getElementById("additionalOptionFieldsMainContainer").style.display = "";
+            } else {
+                document.getElementById("additionalOptionFieldsMainContainer").style.display = "none";
+            }
+        }
+
 
     </script>
 }
