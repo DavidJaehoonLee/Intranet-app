@@ -12,6 +12,25 @@
     }
 
     var pricerUIUtils = new function () {
+        this.getLockTermFunction = (id) => {
+            return new CustomDropDown(id, {
+                ajax: "",
+                ajaxData: () => {
+                    return
+                },
+                textField: "CodeName",
+                valueField: "CodeValue",
+                groupField: "Items",
+                groupBy: "list",
+                orderBy: "",
+                selectedField: "",
+                orderByOrientation: "asc",
+                multiSelect: false,
+                maxSelectedItems: 0,
+                search: false,
+                fixedData: false
+            });
+        }
 
         this.createLabelWithCheckBoxControl = (labelText, inputName, inputId, inputValue, inputClickListener = (htmlInputElement, mouseEvent)) => {
             const label = document.createElement("label");
